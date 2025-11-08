@@ -17,9 +17,3 @@ The goal is to provide a realistic practice setup for computer science exams tha
 - Options to restart the same exam or start a new one from scratch.
 - Configurable themes (Moodle, light, dark).
 
-## Running Locally
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/<your-username>/moodle-exam-simulator.git
-   cd moodle-exam-simulator
