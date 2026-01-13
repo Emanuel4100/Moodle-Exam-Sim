@@ -17,8 +17,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   let currentQuestion = 0;
   let timeLeft = 0;
   let pyodide = null;
+  let timerId = null; 
 
-  // ---------- Helpers ----------
 
   function applyTheme(theme) {
     document.body.className = theme;
@@ -80,7 +80,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const usePreCheckbox = div.querySelector('.usePreCode');
 
-    // Pre-written code editor
     const preEditor = ace.edit(`preEditor${i}`);
     preEditor.setTheme('ace/theme/monokai');
     preEditor.session.setMode('ace/mode/python');
@@ -106,7 +105,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     usePreCheckbox.addEventListener('change', syncPreVisibility);
     syncPreVisibility();
 
-    // Image upload
     const fileInput = div.querySelector('.qImage');
     fileInput.addEventListener('change', e => {
       const file = e.target.files[0];
@@ -120,7 +118,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // ---------- Exam Start & Timer ----------
 
   function startExam() {
     const cards = questionsList.querySelectorAll('.question-card');
@@ -133,7 +130,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // Always clear previous answers
     clearAnswerStorage();
     console.log("Previous exam answers cleared at start.");
 
@@ -153,22 +149,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       timerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
       if (timeLeft > 0) {
         timeLeft--;
-        setTimeout(tick, 1000);
+        timerId = setTimeout(tick, 1000); 
       } else {
-        lockExam("Time is up!");
+        finishExam(true); 
       }
     }
     tick();
   }
 
-  // ---------- Build Exam UI ----------
 
   function buildExamTabs() {
     tabsDiv.innerHTML = '';
     examContent.innerHTML = '';
 
     questions.forEach((q, i) => {
-      // Tab
       const tab = document.createElement('div');
       tab.className = 'tab';
       tab.textContent = `Q${i + 1}`;
@@ -176,7 +170,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       tab.addEventListener('click', () => switchTab(i));
       tabsDiv.appendChild(tab);
 
-      // Question / answer block
       const section = document.createElement('div');
       section.className = 'question hidden';
       section.innerHTML = `
@@ -198,7 +191,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
       examContent.appendChild(section);
 
-      // Attach editor & buttons
       initExamQuestionControls(q, i, tab, section);
     });
   }
@@ -209,6 +201,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     editor.session.setMode('ace/mode/python');
     editor.setFontSize(16);
     editor.setValue(question.preCode || '', 1);
+
+    question.answer = editor.getValue();
 
     const resetBtn = sectionEl.querySelector('.reset-btn');
     const checkBtn = sectionEl.querySelector('.check-btn');
@@ -246,12 +240,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         question.answer = code;
         localStorage.setItem(`q${index}_code`, code);
 
-        // Capture stdout
         pyodide.runPython(`import io, sys; sys.stdout = io.StringIO()`);
         await pyodide.runPythonAsync(code);
         const stdout = pyodide.runPython("sys.stdout.getvalue()");
 
-        // Try to evaluate last expression
         let lastResult = "";
         try {
           const lastLine = code.split('\n').filter(Boolean).pop() || "";
@@ -259,7 +251,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             ? await pyodide.runPythonAsync(`_ = (${lastLine})\n_`)
             : "";
         } catch {
-          // ignore expression errors
+          
         }
 
         const combined = (stdout + (lastResult ? `\n${lastResult}` : '')).trim();
@@ -278,7 +270,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     updateFlagUI();
   }
 
-  // ---------- Navigation / Lock ----------
 
   function switchTab(i) {
     currentQuestion = i;
@@ -295,10 +286,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     timerEl.textContent = message;
   }
 
-  // ---------- Finish & Review ----------
 
-  function finishExam() {
-    if (!confirm('Finish exam and review?')) return;
+  function finishExam(force = false) {
+    if (!force && !confirm('Finish exam and review?')) return;
+    
+    if (timerId) clearTimeout(timerId);
+
+    if (force) alert("Time is up! Exam finished.");
+
     lockExam('Exam finished');
     examScreen.classList.add('hidden');
     reviewScreen.classList.remove('hidden');
@@ -323,17 +318,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class='output'>${q.output || "Not executed."}</div>
       `;
       reviewContent.appendChild(block);
-
       const reviewEditor = ace.edit(`reviewEditor${i}`);
       reviewEditor.setTheme('ace/theme/monokai');
       reviewEditor.session.setMode('ace/mode/python');
-      reviewEditor.setValue(q.answer || q.preCode || '', 1);
+      reviewEditor.setValue(q.answer, 1);
       reviewEditor.setReadOnly(true);
       reviewEditor.setFontSize(16);
     });
   }
 
-  // ---------- Download / Restart ----------
 
   function downloadAnswers() {
     const data = JSON.stringify(questions, null, 2);
@@ -383,12 +376,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     addQuestion();
   }
 
-  // ---------- Wire up buttons & init ----------
 
   addQuestion();
   document.getElementById('addQuestion').addEventListener('click', addQuestion);
   document.getElementById('startExam').addEventListener('click', startExam);
-  document.getElementById('finishExam').addEventListener('click', finishExam);
+  
+  document.getElementById('finishExam').addEventListener('click', () => finishExam(false));
+  
   downloadBtn.addEventListener('click', downloadAnswers);
   restartSameBtn.addEventListener('click', restartSameExam);
   restartFreshBtn.addEventListener('click', restartFreshExam);
