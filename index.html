@@ -20,12 +20,14 @@
       </div>
     </header>
 
-    <!-- Setup Screen -->
     <section id="setupScreen">
       <h2>Exam Setup</h2>
 
-      <label>Total Time (minutes):</label>
-      <input type="number" id="examTime" min="5" max="300" value="90">
+      <div class="time-control">
+        <label for="examTime">⏱ Total Time (minutes):</label>
+        <input type="number" id="examTime" min="5" max="300" value="90">
+      </div>
+
 
       <h3>Questions</h3>
       <div id="questionsList"></div>
@@ -33,7 +35,6 @@
       <button id="startExam">Start Exam</button>
     </section>
 
-    <!-- Exam Screen -->
     <section id="examScreen" class="hidden">
       <div class="exam-header">
         <h2>Exam In Progress</h2>
@@ -44,7 +45,6 @@
       <button id="finishExam">Finish Exam</button>
     </section>
 
-    <!-- Review Screen -->
     <section id="reviewScreen" class="hidden">
       <h2>Exam Review</h2>
       <div id="reviewContent"></div>
@@ -56,7 +56,6 @@
     </section>
   </div>
 
-  <!-- Pyodide -->
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
   <script src="script.js"></script>
 </body>

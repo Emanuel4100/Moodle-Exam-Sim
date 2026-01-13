@@ -57,18 +57,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // ---------- Setup: Add Question ----------
 
-  function addQuestion() {
-    const q = { text: '', image: null, preCode: '', answer: '', output: '', flagged: false };
+function addQuestion() {
+    // שינוי: images הוא מערך
+    const q = { text: '', images: [], preCode: '', answer: '', output: '', flagged: false };
     questions.push(q);
     const i = questions.length - 1;
 
     const div = document.createElement('div');
     div.classList.add('question-card');
+    
+    // שינוי: הוספתי multiple ל-input ושיניתי את הטקסט
     div.innerHTML = `
       <label>Question ${i + 1} Text:</label>
       <textarea class='qText' dir='rtl'></textarea>
-      <label>Image (optional):</label>
-      <input type='file' class='qImage' accept='image/*'>
+      <label>Images (optional - select multiple):</label>
+      <input type='file' class='qImage' accept='image/*' multiple> 
       <div class='imgPreview'></div>
       <label style="display:block; margin-top:8px;">
         <input type="checkbox" class="usePreCode" checked>
@@ -80,6 +83,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const usePreCheckbox = div.querySelector('.usePreCode');
 
+    // Pre-written code editor logic (ללא שינוי)
     const preEditor = ace.edit(`preEditor${i}`);
     preEditor.setTheme('ace/theme/monokai');
     preEditor.session.setMode('ace/mode/python');
@@ -105,19 +109,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     usePreCheckbox.addEventListener('change', syncPreVisibility);
     syncPreVisibility();
 
+    // Image upload logic - תומך בריבוי תמונות
     const fileInput = div.querySelector('.qImage');
+    const previewDiv = div.querySelector('.imgPreview');
+
     fileInput.addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        q.image = ev.target.result;
-        div.querySelector('.imgPreview').innerHTML = `<img src='${q.image}'>`;
-      };
-      reader.readAsDataURL(file);
+      const files = Array.from(e.target.files); // המרה למערך
+      if (!files.length) return;
+      
+      // איפוס אם רוצים להחליף את הסט הקיים (או שאפשר להוסיף, כאן זה מחליף את הסט הקודם בבחירה חדשה)
+      q.images = []; 
+      previewDiv.innerHTML = ''; 
+
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const result = ev.target.result;
+          q.images.push(result); // דחיפה למערך
+          // הוספת תמונה לתצוגה המקדימה
+          const img = document.createElement('img');
+          img.src = result;
+          img.classList.add('preview-thumb');
+          previewDiv.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
     });
   }
-
 
   function startExam() {
     const cards = questionsList.querySelectorAll('.question-card');
@@ -163,6 +181,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     examContent.innerHTML = '';
 
     questions.forEach((q, i) => {
+      // Tab
       const tab = document.createElement('div');
       tab.className = 'tab';
       tab.textContent = `Q${i + 1}`;
@@ -170,13 +189,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       tab.addEventListener('click', () => switchTab(i));
       tabsDiv.appendChild(tab);
 
+      // יצירת ה-HTML של התמונות
+      let imagesHTML = '';
+      if (q.images && q.images.length > 0) {
+        imagesHTML = `<div class='question-images'>
+          ${q.images.map(src => `<img src='${src}' class='question-img'>`).join('')}
+        </div>`;
+      } 
+      // תמיכה לאחור בגרסאות ישנות (אם הייתה רק תמונה אחת)
+      else if (q.image) {
+         imagesHTML = `<div class='question-images'><img src='${q.image}' class='question-img'></div>`;
+      }
+
+      // Question / answer block
       const section = document.createElement('div');
       section.className = 'question hidden';
       section.innerHTML = `
         <div class='question-block'>
           <h3>Question ${i + 1}</h3>
           <p class='question-text'>${escapeHTML(q.text)}</p>
-          ${q.image ? `<img src='${q.image}'>` : ''}
+          ${imagesHTML}
         </div>
         <div class='answer-section'>
           <h4>Answer:</h4>
@@ -191,6 +223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
       examContent.appendChild(section);
 
+      // Attach editor & buttons
       initExamQuestionControls(q, i, tab, section);
     });
   }
@@ -306,22 +339,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     reviewContent.innerHTML = '';
 
     questions.forEach((q, i) => {
+      let imagesHTML = '';
+      if (q.images && q.images.length > 0) {
+        imagesHTML = `<div class='question-images'>
+          ${q.images.map(src => `<img src='${src}' class='question-img'>`).join('')}
+        </div>`;
+      } else if (q.image) {
+         imagesHTML = `<div class='question-images'><img src='${q.image}' class='question-img'></div>`;
+      }
+
       const block = document.createElement('div');
       block.className = 'question-block';
       block.innerHTML = `
         <h3>Question ${i + 1} ${q.flagged ? '(Flagged)' : ''}</h3>
         <p class='question-text'>${escapeHTML(q.text)}</p>
-        ${q.image ? `<img src='${q.image}'>` : ''}
+        ${imagesHTML}
         <h4>Your Answer:</h4>
         <div id='reviewEditor${i}' class='editor'></div>
         <h4>Output:</h4>
         <div class='output'>${q.output || "Not executed."}</div>
       `;
       reviewContent.appendChild(block);
+
       const reviewEditor = ace.edit(`reviewEditor${i}`);
       reviewEditor.setTheme('ace/theme/monokai');
       reviewEditor.session.setMode('ace/mode/python');
-      reviewEditor.setValue(q.answer, 1);
+      reviewEditor.setValue(q.answer || q.preCode || '', 1); // כאן תוקן הבאג של הצגת תשובה ריקה
       reviewEditor.setReadOnly(true);
       reviewEditor.setFontSize(16);
     });

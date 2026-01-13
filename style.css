@@ -10,7 +10,6 @@
   --button-flag: #f59e0b;
 }
 
-/* Dark theme */
 body.dark {
   --bg-color: #0f172a;
   --text-color: #e5e7eb;
@@ -19,7 +18,6 @@ body.dark {
   --border-color: #334155;
 }
 
-/* Moodle theme */
 body.moodle {
   --bg-color: #e7eff7;
   --text-color: #111;
@@ -59,6 +57,16 @@ button:hover { opacity: 0.9; }
 #downloadAnswers {
   background: var(--button-blue);
 }
+
+#addQuestion {
+  background: var(--button-green);
+  width: 100%;       
+  padding: 12px;     
+  font-size: 1.1rem; 
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
 .reset-btn { background: var(--button-red); }
 .check-btn { background: var(--button-green); }
 .flag-btn { background: var(--button-flag); color: #111; }
@@ -71,16 +79,27 @@ textarea, input[type='number'] {
   border-radius: 6px;
   padding: 8px;
   resize: vertical;
+  box-sizing: border-box; 
 }
 
-/* Hebrew question text */
 .qText {
+  min-height: 150px; 
+  font-size: 16px;   
+  line-height: 1.5;  
+  
+
   direction: rtl;
   text-align: right;
+  unicode-bidi: plaintext; 
 }
+
+
 .question-text {
   direction: rtl;
   text-align: right;
+  unicode-bidi: plaintext;
+  white-space: pre-wrap; 
+  font-size: 1.1rem;
 }
 
 section {
@@ -169,4 +188,82 @@ section {
   gap: 10px;
   flex-wrap: wrap;
   margin-top: 10px;
+}
+
+/* עיצוב מודרני לבחירת הזמן */
+.time-control {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* מרווח בין הטקסט לתיבה */
+  background: var(--question-bg); /* משתמש בצבע הרקע של השאלות */
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* צל עדין */
+}
+
+.time-control label {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0;
+  cursor: pointer;
+}
+
+#examTime {
+  width: 110px; /* רוחב קומפקטי יותר */
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--answer-bg);
+  transition: all 0.2s ease-in-out;
+}
+
+/* אפקט כשלוחצים על התיבה */
+#examTime:focus {
+  border-color: var(--button-blue);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); /* הילה כחולה */
+  outline: none;
+  transform: translateY(-1px);
+}
+
+
+
+.question-images {
+  display: flex;
+  flex-wrap: wrap; /* מאפשר לתמונות לרדת שורה אם אין מקום */
+  gap: 15px;       /* רווח בין התמונות */
+  margin-top: 15px;
+  margin-bottom: 15px;
+  justify-content: center; /* מירכוז התמונות */
+}
+
+.question-img {
+  max-width: 100%;       /* לא לחרוג מרוחב המסך */
+  max-height: 400px;     /* גובה מקסימלי כדי שלא יתפוס את כל הדף */
+  width: auto;           /* שמירה על פרופורציות */
+  height: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  object-fit: contain;   /* מוודא שהתמונה לא נמתחת */
+}
+
+/* תצוגה מקדימה במסך ההגדרות (קטן יותר) */
+.imgPreview {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+.preview-thumb {
+  height: 80px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 2px;
+  background: white;
 }
