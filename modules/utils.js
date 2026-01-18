@@ -23,15 +23,19 @@ export function clearAnswerStorage() {
     console.log("Exam storage cleared.");
 }
 
-// עזר ליצירת עורך Ace
+// modules/utils.js
+
 export function createAceEditor(elementId, initialValue = '', readOnly = false) {
     const editor = ace.edit(elementId);
-    editor.setTheme('ace/theme/monokai');
+    editor.setTheme('ace/theme/chrome'); 
     editor.session.setMode('ace/mode/python');
     editor.setFontSize(16);
     editor.setValue(initialValue, 1);
+    editor.setShowPrintMargin(false); 
+    editor.renderer.setShowGutter(true); 
     if (readOnly) {
         editor.setReadOnly(true);
+        editor.container.style.backgroundColor = "#f9f9f9";
     }
     return editor;
 }

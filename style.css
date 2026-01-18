@@ -166,3 +166,44 @@ button {
   border: 1px solid #ddd;
   margin-top: 10px;
 }
+
+/* Time Control - Final Improved Version */
+.time-control {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  padding: 20px;
+  border-radius: 5px;
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.time-control label {
+  font-weight: 600;
+  color: #373a3c;
+}
+
+.time-control input[type="number"] {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  width: 70px;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.time-control input[type="number"]:focus {
+  border-color: #0f6c74;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(15, 108, 116, 0.25);
+}
+
+.time-control input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  vertical-align: middle;
+  accent-color: #0f6c74;
+}
