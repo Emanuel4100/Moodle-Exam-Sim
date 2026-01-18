@@ -2,7 +2,7 @@
 import { initPyodideEngine, runPythonCode } from './modules/pyodide-engine.js';
 import { applyTheme, escapeHTML, clearAnswerStorage, createAceEditor } from './modules/utils.js';
 
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
     // --- DOM Elements ---
     const screens = {
         setup: document.getElementById('setupScreen'),
@@ -14,83 +14,176 @@ document.addEventListener("DOMContentLoaded", async () => {
     let questions = [];
     let timeLeft = 0;
     let timerId = null;
+    let isUnlimitedTime = false; // דגל לזמן ללא הגבלה
 
     // --- Initialization ---
-    await initPyodideEngine();
-    
     const themeSelect = document.getElementById('themeSelect');
     themeSelect.addEventListener("change", e => applyTheme(e.target.value));
     applyTheme(localStorage.getItem("exam_theme") || "moodle");
 
-    // --- Core Logic: Add Question ---
-    function addQuestion() {
-        const q = { text: '', images: [], preCode: '', answer: '', output: '', flagged: false };
-        questions.push(q);
-        const idx = questions.length - 1;
+    document.getElementById('addQuestion').addEventListener('click', () => addQuestionUI());
+    document.getElementById('startExam').addEventListener('click', startExam);
+    document.getElementById('finishExam').addEventListener('click', () => finishExam(false));
+    
+    // כפתורי הורדה
+    document.getElementById('downloadAnswers').addEventListener('click', downloadJSON);
+    document.getElementById('downloadText').addEventListener('click', downloadAsPythonFile);
+
+    document.getElementById('restartFresh').addEventListener('click', () => {
+        if(confirm("New Exam?")) location.reload();
+    });
+
+    initPyodideEngine().then(() => {
+        console.log("Python engine loaded.");
+    }).catch(err => {
+        alert("Error loading Python engine.");
+    });
+
+    // הוספת שאלה ראשונה
+    addQuestionUI();
+
+    // --- Core Logic: Setup UI ---
+    // שינינו את השם ל-addQuestionUI כי הוא עכשיו רק בונה את ה-DOM
+    // המערך questions ייבנה מחדש רק כשמתחילים מבחן
+    function addQuestionUI() {
+        const questionsList = document.getElementById('questionsList');
+        const count = questionsList.children.length; // מספר השאלות הנוכחי
 
         const div = document.createElement('div');
         div.classList.add('question-card');
+        
+        // יצירת מזהה ייחודי זמני לעורך
+        const editorId = `preEditor_temp_${Date.now()}`;
+
         div.innerHTML = `
-            <label>Question ${idx + 1} Text:</label>
-            <textarea class='qText' dir='rtl'></textarea>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label><strong>Question Setup</strong></label>
+                <button class="remove-btn" style="background:#dc2626; font-size:0.8rem; padding:4px 8px; margin:0;">❌ Remove</button>
+            </div>
+            <textarea class='qText' dir='rtl' placeholder="Write question text here..."></textarea>
+            
             <label>Images (select multiple):</label>
             <input type='file' class='qImage' accept='image/*' multiple> 
             <div class='imgPreview'></div>
+            
             <label style="display:block; margin-top:8px;">
                 <input type="checkbox" class="usePreCode" checked> Use pre-written starter code
             </label>
-            <div id='preEditor${idx}' class='editor small'></div>
+            <div id='${editorId}' class='editor small'></div>
         `;
-        document.getElementById('questionsList').appendChild(div);
+        questionsList.appendChild(div);
 
-        // Setup Editor
-        const preEditor = createAceEditor(`preEditor${idx}`);
+        // --- Editor Setup ---
+        const preEditor = createAceEditor(editorId);
         const usePreCheckbox = div.querySelector('.usePreCode');
+        const editorContainer = div.querySelector(`#${editorId}`);
         
-        // Event Listeners for this question setup
+        // שמירת רפרנס לעורך על האלמנט עצמו כדי שנוכל לשלוף אותו אח"כ
+        div.dataset.editorId = editorId; 
+        div.aceEditorInstance = preEditor; 
+
         const syncPreVisibility = () => {
-            div.querySelector(`#preEditor${idx}`).style.display = usePreCheckbox.checked ? 'block' : 'none';
-            q.preCode = usePreCheckbox.checked ? preEditor.getValue() : '';
+            editorContainer.style.display = usePreCheckbox.checked ? 'block' : 'none';
         };
         usePreCheckbox.addEventListener('change', syncPreVisibility);
-        preEditor.session.on('change', () => { if(usePreCheckbox.checked) q.preCode = preEditor.getValue(); });
         syncPreVisibility();
 
-        // Image Logic
+        // --- Image Logic ---
+        // נשמור את התמונות במאפיין על האלמנט עצמו
+        div.uploadedImages = [];
+        
         div.querySelector('.qImage').addEventListener('change', e => {
             const files = Array.from(e.target.files);
             const previewDiv = div.querySelector('.imgPreview');
-            q.images = []; 
+            div.uploadedImages = []; 
             previewDiv.innerHTML = ''; 
             
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = ev => {
-                    q.images.push(ev.target.result);
+                    div.uploadedImages.push(ev.target.result);
                     previewDiv.innerHTML += `<img src='${ev.target.result}' class='preview-thumb'>`;
                 };
                 reader.readAsDataURL(file);
             });
         });
+
+        // --- פיצ'ר 1: מחיקת שאלה ---
+        div.querySelector('.remove-btn').addEventListener('click', () => {
+            // אם זו השאלה היחידה, לא נמחוק או שננקה אותה
+            if (questionsList.children.length === 1) {
+                alert("Cannot remove the last question.");
+                return;
+            }
+            if(confirm("Remove this question?")) {
+                div.remove();
+            }
+        });
     }
 
-    // --- Core Logic: Exam ---
+    // --- Core Logic: Start Exam ---
     function startExam() {
-        // Collect Texts
+        // פיצ'ר 1 המשך: בניית המערך מחדש על סמך מה שנשאר במסך
+        questions = [];
         const cards = document.querySelectorAll('.question-card');
-        cards.forEach((card, i) => questions[i].text = card.querySelector('.qText').value);
+        
+        if (cards.length === 0) return alert('Add at least one question.');
 
-        if (!questions.length) return alert('Add at least one question.');
+        cards.forEach((card) => {
+            const q = {
+                text: card.querySelector('.qText').value,
+                images: card.uploadedImages || [],
+                preCode: '',
+                answer: '',
+                output: '',
+                flagged: false
+            };
+            
+            // שליפת הקוד מהעורך ששמרנו
+            const usePre = card.querySelector('.usePreCode').checked;
+            if (usePre && card.aceEditorInstance) {
+                q.preCode = card.aceEditorInstance.getValue();
+            }
+            
+            questions.push(q);
+        });
 
         clearAnswerStorage();
         switchScreen('exam');
         
-        // Timer Setup
-        timeLeft = parseInt(document.getElementById('examTime').value, 10) * 60;
-        startTimer();
+        // פיצ'ר 2: זמן ללא הגבלה
+        isUnlimitedTime = document.getElementById('noTimeLimit').checked;
+        if (!isUnlimitedTime) {
+            timeLeft = parseInt(document.getElementById('examTime').value, 10) * 60;
+        }
         
-        // Build UI
+        startTimer();
         buildExamUI();
+    }
+
+    // --- Timer Logic ---
+    function startTimer() {
+        const timerEl = document.getElementById('timer');
+        
+        if (isUnlimitedTime) {
+            timerEl.textContent = "∞ No Limit";
+            timerEl.style.backgroundColor = "#dcfce7"; // צבע ירוק בהיר
+            timerEl.style.color = "#166534";
+            return; // לא מפעילים את ה-interval
+        }
+
+        function tick() {
+            const m = Math.floor(timeLeft / 60);
+            const s = timeLeft % 60;
+            timerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            if (timeLeft > 0) {
+                timeLeft--;
+                timerId = setTimeout(tick, 1000);
+            } else {
+                finishExam(true);
+            }
+        }
+        tick();
     }
 
     function buildExamUI() {
@@ -107,7 +200,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             tab.onclick = () => switchTab(i);
             tabsDiv.appendChild(tab);
 
-            // Images HTML
+            // Images
             const imagesHTML = q.images.length ? 
                 `<div class='question-images'>${q.images.map(src => `<img src='${src}' class='question-img'>`).join('')}</div>` : '';
 
@@ -131,8 +224,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 </div>
             `;
             examContent.appendChild(section);
-
-            // Logic for specific question
             initQuestionLogic(q, i, tab, section);
         });
         switchTab(0);
@@ -183,25 +274,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         document.querySelectorAll('.question').forEach((q, i) => q.classList.toggle('hidden', i !== index));
     }
 
-    function startTimer() {
-        const timerEl = document.getElementById('timer');
-        function tick() {
-            const m = Math.floor(timeLeft / 60);
-            const s = timeLeft % 60;
-            timerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-            if (timeLeft > 0) {
-                timeLeft--;
-                timerId = setTimeout(tick, 1000);
-            } else {
-                finishExam(true);
-            }
-        }
-        tick();
-    }
-
     function finishExam(force = false) {
         if (!force && !confirm('Finish exam?')) return;
-        clearTimeout(timerId);
+        if (timerId) clearTimeout(timerId);
         switchScreen('review');
         
         const reviewContent = document.getElementById('reviewContent');
@@ -221,15 +296,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-    // --- Global Buttons ---
-    document.getElementById('addQuestion').addEventListener('click', addQuestion);
-    document.getElementById('startExam').addEventListener('click', startExam);
-    document.getElementById('finishExam').addEventListener('click', () => finishExam(false));
-    
-    document.getElementById('restartFresh').addEventListener('click', () => {
-        if(confirm("New Exam?")) location.reload();
-    });
-    
-    // Start with one question
-    addQuestion();
+    function downloadJSON() {
+        const data = JSON.stringify(questions, null, 2);
+        const blob = new Blob([data], { type: "application/json" });
+        triggerDownload(blob, "exam_answers.json");
+    }
+
+    // --- פיצ'ר 3: הורדה כקובץ פייתון/טקסט ---
+    function downloadAsPythonFile() {
+        let content = `"""\nEXAM SUBMISSION\nGenerated by Moodle Exam Simulator\n"""\n\n`;
+
+        questions.forEach((q, i) => {
+            content += `# ==========================================\n`;
+            content += `# QUESTION ${i + 1}\n`;
+            content += `# ==========================================\n`;
+            content += `"""\n${q.text.replace(/"/g, "'")}\n"""\n\n`;
+            
+            content += `# --- Your Code: ---\n`;
+            content += `${q.answer}\n\n`;
+            
+            content += `# --- Execution Output: ---\n`;
+            // הופך את הפלט להערות כדי שהקובץ יהיה פייתון תקין
+            const commentedOutput = (q.output || "No output").split('\n').map(line => `# ${line}`).join('\n');
+            content += `${commentedOutput}\n\n\n`;
+        });
+
+        const blob = new Blob([content], { type: "text/x-python" });
+        triggerDownload(blob, "exam_submission.py");
+    }
+
+    function triggerDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
 });

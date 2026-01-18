@@ -267,3 +267,12 @@ section {
   padding: 2px;
   background: white;
 }
+
+.remove-btn:hover {
+    opacity: 0.8;
+}
+
+/* התאמה למסך ההגדרות */
+.question-card {
+    position: relative; /* כדי שאפשר יהיה למקם דברים בפנים אם צריך */
+}

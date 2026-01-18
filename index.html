@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Moodle Exam Simulator</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/ace.js"></script>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
   <script type="module" src="main.js"></script>
 </head>
@@ -25,15 +26,24 @@
       <h2>Exam Setup</h2>
 
       <div class="time-control">
-        <label for="examTime">⏱ Total Time (minutes):</label>
-        <input type="number" id="examTime" min="5" max="300" value="90">
+        <div>
+            <label for="examTime">⏱ Total Time (minutes):</label>
+            <input type="number" id="examTime" min="5" max="300" value="90">
+        </div>
+        
+        <div style="margin-left: 20px; display: flex; align-items: center;">
+            <input type="checkbox" id="noTimeLimit" style="width: 20px; height: 20px; margin-right: 8px;">
+            <label for="noTimeLimit">No Time Limit (∞)</label>
+        </div>
       </div>
-
 
       <h3>Questions</h3>
       <div id="questionsList"></div>
-      <button id="addQuestion">Add Question</button><br>
-      <button id="startExam">Start Exam</button>
+      
+      <div style="margin-top: 20px;">
+          <button id="addQuestion">Add Question</button><br>
+          <button id="startExam">Start Exam</button>
+      </div>
     </section>
 
     <section id="examScreen" class="hidden">
@@ -50,14 +60,12 @@
       <h2>Exam Review</h2>
       <div id="reviewContent"></div>
       <div class="review-buttons">
-        <button id="downloadAnswers">Download Answers (JSON)</button>
+        <button id="downloadAnswers">Download JSON</button>
+        <button id="downloadText" style="background-color: #5b21b6;">Download as .py File</button>
         <button id="restartSame">Restart Same Exam</button>
         <button id="restartFresh">New Exam (Clear All)</button>
       </div>
     </section>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
-  <script src="script.js"></script>
 </body>
 </html>
