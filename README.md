@@ -19,4 +19,4 @@ A client-side web application that simulates the Hebrew University Moodle coding
 ## Disclaimer
 
 An unofficial student project for practice. Not affiliated with the Hebrew University of Jerusalem or Moodle.
-Mosly created LLMs (vibe coding)
+Mostly used LLMs for coding (vibe coding)
