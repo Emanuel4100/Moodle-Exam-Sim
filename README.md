@@ -1,19 +1,22 @@
-# Moodle Exam Simulator
+# HUJI Exam Simulator
 
-This project is a local web-based environment that simulates the experience of taking a Moodle-style coding exam.  
-It allows you to write, run, and review code directly in the browser using a built-in Python interpreter (Pyodide).  
-The goal is to provide a realistic practice setup for computer science exams that use open-code questions.
+A client-side web application that simulates the Hebrew University Moodle coding exam environment. It allows students to write and execute Python code directly in the browser using Pyodide.
 
-## Features
+## Key Features
 
-- Multiple questions per exam, each with its own text, image, and optional starter code.
-- Right-to-left support for Hebrew questions.
-- Python code editor with syntax highlighting (Ace Editor).
-- Shared timer across all questions.
-- Ability to flag questions for later review.
-- Run code directly in the browser (no server required).
-- Automatic saving during the exam.
-- Review screen showing all answers and program outputs after finishing.
-- Options to restart the same exam or start a new one from scratch.
-- Configurable themes (Moodle, light, dark).
+* **Authentic Interface:** Replicates HUJI Moodle design, including sidebar, timer, and navigation.
+* **In-Browser Execution:** Runs Python code locally using Pyodide (WebAssembly).
+* **Exam Tools:** Ace Editor (white theme), auto-save, and support for questions with images or starter code.
+* **Export Options:** Download answers as a backup JSON or a submittable `.py` file.
 
+
+## Technologies
+
+* HTML5, CSS3, JavaScript (ES6+)
+* Pyodide (Python WebAssembly)
+* Ace Editor
+
+## Disclaimer
+
+An unofficial student project for practice. Not affiliated with the Hebrew University of Jerusalem or Moodle.
+Mosly created LLMs (vibe coding)
