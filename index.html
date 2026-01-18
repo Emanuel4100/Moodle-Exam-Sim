@@ -2,70 +2,68 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Moodle Exam Simulator</title>
+  <title>HUJI Exam Simulator</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.23.4/ace.js"></script>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.26.2/full/pyodide.js"></script>
   <script type="module" src="main.js"></script>
 </head>
 <body>
+
+  <div class="moodle-header">
+      <div class="breadcrumbs">
+          Hebrew University <span>/</span> CS Exams <span>/</span> Simulator
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h1>
+              <span class="icon-quiz">🎓</span> 
+              HUJI Exam Simulator
+          </h1>
+          <div id="pythonStatus" style="font-size: 0.9rem; display: flex; align-items: center; gap: 5px;">
+              <span style="height: 10px; width: 10px; background-color: red; border-radius: 50%; display: inline-block;" id="statusDot"></span>
+              <span id="statusText">Loading Python engine...</span>
+          </div>
+      </div>
+  </div>
+
   <div class="container">
-    <header>
-      <h1>Moodle Exam Simulator</h1>
-      <div>
-        <label for="themeSelect">Theme:</label>
-        <select id="themeSelect">
-          <option value="moodle">Moodle</option>
-          <option value="light">Light</option>
-          <option value="dark">Dark</option>
-        </select>
-      </div>
-    </header>
-
+    
     <section id="setupScreen">
-      <h2>Exam Setup</h2>
+      <h2 style="color:#701e51; border-bottom:1px solid #ddd; padding-bottom:10px;">Exam Setup</h2>
 
-      <div class="time-control">
-        <div>
-            <label for="examTime">⏱ Total Time (minutes):</label>
-            <input type="number" id="examTime" min="5" max="300" value="90">
-        </div>
-        
-        <div style="margin-left: 20px; display: flex; align-items: center;">
-            <input type="checkbox" id="noTimeLimit" style="width: 20px; height: 20px; margin-right: 8px;">
-            <label for="noTimeLimit">No Time Limit (∞)</label>
-        </div>
+      <div class="time-control" style="margin: 20px 0;">
+        <label>Total Time (minutes):</label>
+        <input type="number" id="examTime" min="5" max="300" value="90" style="padding:5px; width:60px;">
+        <label style="margin-left:15px;"><input type="checkbox" id="noTimeLimit"> No Time Limit</label>
       </div>
 
-      <h3>Questions</h3>
       <div id="questionsList"></div>
       
       <div style="margin-top: 20px;">
-          <button id="addQuestion">Add Question</button><br>
-          <button id="startExam">Start Exam</button>
+          <button id="addQuestion" class="btn-moodle-secondary">Add Question</button>
+          <button id="startExam" class="btn-moodle-primary">Start Attempt</button>
       </div>
     </section>
 
     <section id="examScreen" class="hidden">
-      <div class="exam-header">
-        <h2>Exam In Progress</h2>
-        <div id="timer">--:--</div>
-      </div>
-      <div class="tabs" id="tabs"></div>
-      <div id="examContent"></div>
-      <button id="finishExam">Finish Exam</button>
-    </section>
+      </section>
+    
+    <div id="timer" style="position:fixed; top:10px; right:20px; background:#fff; border:1px solid #ccc; padding:5px 10px; font-weight:bold; z-index: 1000;">
+        --:--
+    </div>
 
-    <section id="reviewScreen" class="hidden">
-      <h2>Exam Review</h2>
-      <div id="reviewContent"></div>
-      <div class="review-buttons">
-        <button id="downloadAnswers">Download JSON</button>
-        <button id="downloadText" style="background-color: #5b21b6;">Download as .py File</button>
-        <button id="restartSame">Restart Same Exam</button>
-        <button id="restartFresh">New Exam (Clear All)</button>
+    <section id="reviewScreen" class="hidden" style="background:white; padding:20px; border: 1px solid #ddd;">
+      <h2 style="color: #0f6c74;">Summary of Attempt</h2>
+      
+      <div class="review-buttons" style="background: #f8f9fa; padding: 15px; border-bottom: 1px solid #ddd; margin-bottom: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+        <button id="downloadAnswers" class="btn-moodle-secondary">Download JSON</button>
+        <button id="downloadText" class="btn-moodle-primary">Download .py File</button>
+        <button id="restartFresh" style="background:#d9534f; color:white; margin-left: auto;">Start New Exam</button>
       </div>
+
+      <div id="reviewContent"></div>
     </section>
   </div>
+
 </body>
 </html>

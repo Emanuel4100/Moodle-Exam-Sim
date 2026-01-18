@@ -1,278 +1,168 @@
 :root {
-  --bg-color: #f5f5f5;
-  --text-color: #111;
-  --question-bg: #dbeaf1;
-  --answer-bg: #ffffff;
-  --border-color: #ccc;
-  --button-blue: #2563eb;
-  --button-green: #3b9a4a;
-  --button-red: #b04040;
-  --button-flag: #f59e0b;
-}
-
-body.dark {
-  --bg-color: #0f172a;
-  --text-color: #e5e7eb;
-  --question-bg: #1e293b;
-  --answer-bg: #0f172a;
-  --border-color: #334155;
-}
-
-body.moodle {
-  --bg-color: #e7eff7;
-  --text-color: #111;
-  --question-bg: #dbeaf1;
-  --answer-bg: #ffffff;
-  --border-color: #a1b3c5;
+  --moodle-purple: #701e51; /* הצבע של כפתור Reset / Back */
+  --moodle-teal: #0f6c74;   /* הצבע של כפתור Check / Next */
+  --moodle-light-bg: #f2f2f2;
+  --moodle-question-bg: #e7f3f5; /* הרקע התכלת של השאלה */
+  --moodle-border: #dee2e6;
+  --text-color: #373a3c;
+  --link-color: #0f6c74;
 }
 
 body {
-  font-family: system-ui, sans-serif;
-  background: var(--bg-color);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: var(--moodle-light-bg);
   color: var(--text-color);
   margin: 0;
-  padding: 20px;
-}
-.container { max-width: 1100px; margin: 0 auto; }
-
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  padding: 0;
 }
 
-button {
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-button:hover { opacity: 0.9; }
-
-#startExam, #finishExam,
-#restartSame, #restartFresh,
-#downloadAnswers {
-  background: var(--button-blue);
-}
-
-#addQuestion {
-  background: var(--button-green);
-  width: 100%;       
-  padding: 12px;     
-  font-size: 1.1rem; 
-  margin-bottom: 15px;
-  font-weight: bold;
-}
-
-.reset-btn { background: var(--button-red); }
-.check-btn { background: var(--button-green); }
-.flag-btn { background: var(--button-flag); color: #111; }
-
-textarea, input[type='number'] {
-  width: 100%;
-  background: var(--answer-bg);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 8px;
-  resize: vertical;
-  box-sizing: border-box; 
-}
-
-.qText {
-  min-height: 150px; 
-  font-size: 16px;   
-  line-height: 1.5;  
-  
-
-  direction: rtl;
-  text-align: right;
-  unicode-bidi: plaintext; 
-}
-
-
-.question-text {
-  direction: rtl;
-  text-align: right;
-  unicode-bidi: plaintext;
-  white-space: pre-wrap; 
-  font-size: 1.1rem;
-}
-
-section {
-  background: var(--answer-bg);
-  padding: 15px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.hidden { display: none; }
-
-.exam-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-#timer {
-  font-size: 1.2rem;
-  background: var(--question-bg);
-  padding: 6px 12px;
-  border-radius: 6px;
-}
-
-.tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 10px;
-  flex-wrap: wrap;
-}
-.tab {
-  background: var(--button-blue);
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  color: white;
-}
-.tab.active {
-  background: #1e3a8a;
-  font-weight: bold;
-}
-.tab.flagged::after {
-  content: " ⚑";
-  font-size: 0.9em;
-}
-
-.question-block {
-  background: var(--question-bg);
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  border: 1px solid var(--border-color);
-}
-.answer-section {
-  background: var(--answer-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px;
-  margin-top: 10px;
-}
-
-.editor {
-  width: 100%;
-  height: 450px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  margin-top: 10px;
-}
-.ace_editor {
-  font-size: 16px !important;
-  line-height: 1.4 !important;
-}
-
-.output {
-  background: #00000010;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 10px;
-  white-space: pre-wrap;
-  min-height: 100px;
-  margin-top: 8px;
-}
-
-.review-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-/* עיצוב מודרני לבחירת הזמן */
-.time-control {
-  display: flex;
-  align-items: center;
-  gap: 15px; /* מרווח בין הטקסט לתיבה */
-  background: var(--question-bg); /* משתמש בצבע הרקע של השאלות */
-  padding: 15px 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05); /* צל עדין */
-}
-
-.time-control label {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-color);
-  margin: 0;
-  cursor: pointer;
-}
-
-#examTime {
-  width: 110px; /* רוחב קומפקטי יותר */
-  font-size: 1.3rem;
-  font-weight: bold;
-  text-align: center;
-  padding: 10px;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--answer-bg);
-  transition: all 0.2s ease-in-out;
-}
-
-/* אפקט כשלוחצים על התיבה */
-#examTime:focus {
-  border-color: var(--button-blue);
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); /* הילה כחולה */
-  outline: none;
-  transform: translateY(-1px);
-}
-
-
-
-.question-images {
-  display: flex;
-  flex-wrap: wrap; /* מאפשר לתמונות לרדת שורה אם אין מקום */
-  gap: 15px;       /* רווח בין התמונות */
-  margin-top: 15px;
-  margin-bottom: 15px;
-  justify-content: center; /* מירכוז התמונות */
-}
-
-.question-img {
-  max-width: 100%;       /* לא לחרוג מרוחב המסך */
-  max-height: 400px;     /* גובה מקסימלי כדי שלא יתפוס את כל הדף */
-  width: auto;           /* שמירה על פרופורציות */
-  height: auto;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  object-fit: contain;   /* מוודא שהתמונה לא נמתחת */
-}
-
-/* תצוגה מקדימה במסך ההגדרות (קטן יותר) */
-.imgPreview {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-.preview-thumb {
-  height: 80px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 2px;
+/* Header & Breadcrumbs */
+.moodle-header {
   background: white;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ccc;
+  margin-bottom: 20px;
 }
 
-.remove-btn:hover {
-    opacity: 0.8;
+.breadcrumbs {
+  font-size: 0.9rem;
+  color: var(--link-color);
+  margin-bottom: 10px;
+}
+.breadcrumbs span { color: #666; margin: 0 5px; }
+
+h1 {
+  font-size: 1.7rem;
+  font-weight: 400;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* התאמה למסך ההגדרות */
-.question-card {
-    position: relative; /* כדי שאפשר יהיה למקם דברים בפנים אם צריך */
+.icon-quiz {
+  color: #db2619; /* צבע האייקון של הבוחן */
+  font-size: 1.5rem;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+/* Setup Screen */
+#setupScreen {
+  background: white;
+  padding: 30px;
+  border: 1px solid var(--moodle-border);
+  border-radius: 4px;
+}
+
+/* Exam Layout - Grid System */
+#examScreen {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+/* Sidebar (Question Info Block) */
+.question-sidebar {
+  width: 140px;
+  flex-shrink: 0;
+  background: white;
+  border: 1px solid var(--moodle-border);
+  border-radius: 2px;
+  padding: 15px;
+  font-size: 0.9rem;
+}
+
+.q-info-block h4 { margin: 0 0 5px 0; font-size: 1rem; color: var(--text-color); }
+.q-status { color: #d9534f; font-weight: bold; margin-bottom: 10px; display: block; } /* Not complete - red */
+.q-flag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-top: 10px;
+}
+.q-flag.flagged { color: #b90e0a; font-weight: bold; }
+
+/* Main Content Area */
+.exam-main-content {
+  flex-grow: 1;
+}
+
+.question-card-moodle {
+  background-color: var(--moodle-question-bg);
+  border: 1px solid #cce5e9;
+  padding: 20px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.q-text {
+  background: transparent;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 15px;
+  white-space: pre-wrap;
+}
+
+.answer-label {
+  font-weight: bold;
+  margin-bottom: 5px;
+  display: block;
+}
+
+/* Editor Styling override */
+.editor {
+  border: 1px solid #bbb;
+  border-radius: 0; /* Moodle boxes are square */
+}
+
+/* Buttons Moodle Style */
+button {
+  border: none;
+  border-radius: 2px;
+  padding: 8px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-moodle-primary {
+  background-color: var(--moodle-teal);
+  color: white;
+}
+
+.btn-moodle-secondary {
+  background-color: var(--moodle-purple);
+  color: white;
+}
+
+.btn-moodle-reset {
+  background-color: var(--moodle-purple);
+  color: white;
+  font-size: 0.9rem;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+}
+
+.nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+/* Utilities */
+.hidden { display: none !important; }
+
+/* Images */
+.question-images img {
+  max-width: 100%;
+  border: 1px solid #ddd;
+  margin-top: 10px;
 }
