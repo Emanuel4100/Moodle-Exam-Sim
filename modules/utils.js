@@ -25,14 +25,29 @@ export function clearAnswerStorage() {
 
 // modules/utils.js
 
+// modules/utils.js
+
+// modules/utils.js
+
 export function createAceEditor(elementId, initialValue = '', readOnly = false) {
     const editor = ace.edit(elementId);
+    
     editor.setTheme('ace/theme/chrome'); 
     editor.session.setMode('ace/mode/python');
     editor.setFontSize(16);
     editor.setValue(initialValue, 1);
+    
     editor.setShowPrintMargin(false); 
     editor.renderer.setShowGutter(true); 
+
+    editor.setOptions({
+        enableBasicAutocompletion: true,
+        enableLiveAutocompletion: true,
+        enableSnippets: true
+    });
+
+    editor.setKeyboardHandler("ace/keyboard/vscode");
+
     if (readOnly) {
         editor.setReadOnly(true);
         editor.container.style.backgroundColor = "#f9f9f9";
